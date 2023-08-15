@@ -39,6 +39,7 @@ clock = pygame.time.Clock()
 running = True
 running1 = False
 paused = False
+# bullet_count = [0 for _ in s_blocks]
 
 # Colors
 
@@ -72,7 +73,8 @@ class Player(pygame.sprite.Sprite):
         if pressed_keys[K_LEFT]:
             self.rect.move_ip(-1, 0) 
         if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(1, 0)   
+            self.rect.move_ip(1, 0) 
+
         # Keep player on the screen
         if self.rect.left < 0:
             self.rect.left = 0
@@ -94,8 +96,9 @@ class Player(pygame.sprite.Sprite):
                 if pressed_keys[K_RIGHT]:
                     self.rect.right = block.rect.left            
 
-class Block:
+class Block(pygame.sprite.Sprite):
     def __init__(self, color, x, width, y, length, id):
+        super(Block, self).__init__()
         self.color = color
         self.outline_color = 'white'
         self.x = x
@@ -114,6 +117,40 @@ class Block:
     ##### update block
     # def update_block(self):  for future 
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super(Bullet, self).__init__()
+        radius = 5
+        self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 0, 0), (radius, radius), radius)
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 4     
+        # self.bullet_count = [0 for _ in s_blocks]
+        i = 0
+    def update(self):
+        global bullet_count
+        self.rect.x += self.speed
+        print('test1')
+        for block in f_blocks:
+            if self.rect.colliderect(block.rect) or self.rect.left > SCREEN_WIDTH:
+                self.kill()
+                print('test2')
+        for block in s_blocks:
+            if self.rect.colliderect(block.rect):
+                self.kill()
+                print('test3')
+                # print(s_blocks.index(block))
+                bullet_count[s_blocks.index(block)] = bullet_count[s_blocks.index(block)] + 1
+                print('test4')
+                print(bullet_count[s_blocks.index(block)])
+                if bullet_count[s_blocks.index(block)] > 10:
+                    # s_blocks.index(block).kill()
+                    print('test5')
+                    print(s_blocks.index(block))
+                    s_blocks[s_blocks.index(block)].kill()
+                    s_blocks.pop(s_blocks.index(block))
+                        
+
 # Instantiate player1. Right now, this is just a rectangle.
 f_player = Player(20, 20, 0, SCREEN_HEIGHT/2)
 p1 = pygame.sprite.Group()
@@ -123,6 +160,8 @@ p1.add(f_player)
 s_player = Player(20, 20, 780, SCREEN_HEIGHT/2)
 p2 = pygame.sprite.Group()
 p2.add(s_player)
+
+bullet_group = pygame.sprite.Group()
 
 # (self, color, x1, x2, y1, y2, id)
 # player1's safety block
@@ -179,6 +218,7 @@ s_block23 = Block('green', 710, 20, 560, 20, 23)
 s_block24 = Block('red', 690, 20, 560, 20, 24)
 s_block25 = Block('green', 750, 20, 580, 20, 25)
 
+
 # dictionary of Blocks
 f_blocks = [f_block1, f_block2, f_block3, f_block4, f_block5, f_block6, f_block7, f_block8,
           f_block9, f_block10, f_block11, f_block12, f_block13, f_block14, f_block15, 
@@ -188,8 +228,15 @@ s_blocks = [s_block1, s_block2, s_block3, s_block4, s_block5, s_block6, s_block7
           s_block9, s_block10, s_block11, s_block12, s_block13, s_block14, s_block15, 
           s_block16, s_block17, s_block18, s_block19, s_block20, s_block21, s_block22,
           s_block23, s_block24, s_block25]
+f_block_group = pygame.sprite.Group()
+s_block_group = pygame.sprite.Group()
+for block in f_blocks:
+    f_block_group.add(block)
 
-# blo = 
+for block in s_blocks:
+    s_block_group.add(block)
+bullet_count = [0 for _ in s_blocks]
+
 
 # Function to draw buttons
 def print_text( x_pos, y_pos, text, color, size):
@@ -212,17 +259,6 @@ def draw_button(x, y, width, height, text, color):
     text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(text_surface, text_rect)
 
-# def check_collusions(player, blocks):
-#     for block in blocks:
-#         if player.rect.colliderect(block.block):
-#             return block
-        
-# #     return None
-# def check_collisions(player, blocks):
-#     for block in blocks:
-#         if player.rect.colliderect(block.block):
-#             return block
-#     return None
 
 def play_ground():
     # Create the screen object
@@ -242,14 +278,23 @@ def play_ground():
   
     while config.running1: 
         screen.fill((0, 0, 0))  # Fill the screen with black
-        for block in f_blocks:
+        
+        for block in f_block_group:
             block.draw()
             pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(block.x, block.y, block.width, block.length), 1)
 
 
-        for block in s_blocks:
+        for block in s_block_group:
             block.draw()
             pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(block.x, block.y, block.width, block.length), 1)
+
+        # f_block_group.update()
+        # f_block_group.draw(screen)
+
+        # s_block_group.update()
+        # s_block_group.draw(screen)
+        # Get all the keys currently pressed
+        pressed_keys = pygame.key.get_pressed()
 
         # for loop through the event queue
         for event in pygame.event.get():
@@ -270,34 +315,20 @@ def play_ground():
                 # game_over_screen(score)
                 # config.running = False
                 config.running1 = False
-            
+                    # Inside the game loop, update and draw the bullets
+            if pressed_keys[K_SPACE]:
+                bullet = Bullet(f_player.rect.right, f_player.rect.centery)
+                bullet_group.add(bullet)
 
-        # screen.fill((0, 0, 0))  # Fill the screen with black
-
-        # for block in f_blocks:
-        #     block.draw()
-
-        # for block in s_blocks:
-        #     block.draw()
-
-        # colliding_block = check_collisions(f_player, f_blocks) 
-        # # print(colliding_block.x)
-        # # print(colliding_block.y)
-        # if colliding_block:
-        #     if f_player.rect.right > colliding_block.x and f_player.rect.left < colliding_block.x + colliding_block.width:
-        #         if f_player.rect.bottom > colliding_block.y and f_player.rect.top < colliding_block.y + colliding_block.length:
-        #             if f_player.rect.right < colliding_block.x + colliding_block.width / 2:
-        #                 f_player.rect.right = colliding_block.x
-        #             else:
-        #                 f_player.rect.left = colliding_block.x + colliding_block.width
-
-
-        # Get all the keys currently pressed
-        pressed_keys = pygame.key.get_pressed()
+        # # Get all the keys currently pressed
+        # pressed_keys = pygame.key.get_pressed()
         # Update the player sprite based on user keypresses
         f_player.update(pressed_keys)
         # player2.update(pressed_keys)
 
+        # Update and draw bullets
+        bullet_group.update()
+        bullet_group.draw(screen)
         # Draw the player's on the screen
         screen.blit(f_player.surf, f_player.rect)  
         screen.blit(s_player.surf, s_player.rect)   
@@ -328,11 +359,6 @@ while config.running:
             elif 300 <= x <= 480 and 250 <= y <= 300:
                 # running = False 
                 pygame.quit()
-
-    # running1 = True
-    # first_page()
-    # Clear the screen
-    # screen.fill((255, 255, 255))
 
     # Draw the buttons
     draw_button(300, 150, BUTTON_WIDTH, BUTTON_HEIGHT, "START GAME", (0,153,0))
