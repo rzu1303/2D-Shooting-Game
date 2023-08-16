@@ -39,6 +39,8 @@ clock = pygame.time.Clock()
 running = True
 running1 = False
 paused = False
+splayer_count = 0
+pplayer_count = 0
 # bullet_count = [0 for _ in s_blocks]
 
 # Colors
@@ -129,23 +131,34 @@ class Bullet(pygame.sprite.Sprite):
         i = 0
     def update(self):
         global bullet_count
+        global splayer_count
         self.rect.x += self.speed
-        print('test1')
+        ############
+        if self.rect.colliderect(s_player.rect):
+            splayer_count += 1
+            if splayer_count == 3:
+                print("Win!!!")
+                s_player.kill()
+                ### closing the game. will check again for better soluation
+                config.running1 = False
+
+
         for block in f_blocks:
             if self.rect.colliderect(block.rect) or self.rect.left > SCREEN_WIDTH:
                 self.kill()
-                print('test2')
+
         for block in s_blocks:
             if self.rect.colliderect(block.rect):
                 self.kill()
-                print('test3')
+
+
                 # print(s_blocks.index(block))
                 bullet_count[s_blocks.index(block)] = bullet_count[s_blocks.index(block)] + 1
-                print('test4')
+
                 print(bullet_count[s_blocks.index(block)])
                 if bullet_count[s_blocks.index(block)] > 10:
                     # s_blocks.index(block).kill()
-                    print('test5')
+
                     print(s_blocks.index(block))
                     s_blocks[s_blocks.index(block)].kill()
                     s_blocks.pop(s_blocks.index(block))
@@ -275,10 +288,19 @@ def play_ground():
     p2 = pygame.sprite.Group()
     p2.add(s_player)
     global paused
+    start_time = time.time()
   
     while config.running1: 
         screen.fill((0, 0, 0))  # Fill the screen with black
-        
+        # Inside the game loop, update and draw the bullets
+        time1 = start_time
+        time2 = time.time()
+
+        if time2-time1 > .3:
+            bullet = Bullet(f_player.rect.right, f_player.rect.centery)
+            bullet_group.add(bullet) 
+            start_time = time.time()
+
         for block in f_block_group:
             block.draw()
             pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(block.x, block.y, block.width, block.length), 1)
@@ -315,10 +337,7 @@ def play_ground():
                 # game_over_screen(score)
                 # config.running = False
                 config.running1 = False
-                    # Inside the game loop, update and draw the bullets
-            if pressed_keys[K_SPACE]:
-                bullet = Bullet(f_player.rect.right, f_player.rect.centery)
-                bullet_group.add(bullet)
+
 
         # # Get all the keys currently pressed
         # pressed_keys = pygame.key.get_pressed()
