@@ -61,26 +61,26 @@ class Player(pygame.sprite.Sprite):
 
     # Move the sprite based on user keypresses
     def update(self, pressed_keys):
-
+        speed = 5    
         # First player's movement
         if pressed_keys == 'K_UP':
-            first_player.rect.move_ip(0, -1)
+            first_player.rect.move_ip(0, -speed)
         if pressed_keys == 'K_DOWN':
-            first_player.rect.move_ip(0, 1)
+            first_player.rect.move_ip(0, speed)
         if pressed_keys == 'K_LEFT':
-            first_player.rect.move_ip(-1, 0)
+            first_player.rect.move_ip(-speed, 0)
         if pressed_keys == 'K_RIGHT':
-            first_player.rect.move_ip(1, 0) 
+            first_player.rect.move_ip(speed, 0) 
 
         # Second player's movement
         if pressed_keys == 'K_w':
-            second_player.rect.move_ip(0, -1)
+            second_player.rect.move_ip(0, -speed)
         if pressed_keys == 'K_s':
-            second_player.rect.move_ip(0, 1)
+            second_player.rect.move_ip(0, speed)
         if pressed_keys == 'K_a':
-            second_player.rect.move_ip(-1, 0)
+            second_player.rect.move_ip(-speed, 0)
         if pressed_keys == 'K_d': 
-            second_player.rect.move_ip(1, 0)        
+            second_player.rect.move_ip(speed, 0)        
 
         # Keep player on the screen
         if first_player.rect.left < 0:
@@ -148,10 +148,10 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(self.image, (255, 0, 0), (self.radius, self.radius), self.radius)
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 1     
+        # self.speed = 1  
+        self.speed = 6    
 
     def update(self, id):
-        global bullet_count
         global second_player_count
         global first_player_count
 
@@ -431,8 +431,8 @@ def connection_lost():
 
     while run:
         screen.fill((0, 0, 0))
-        draw_button(300, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "connection Lost...", (0,153,0))
-        draw_button(300, 250, BUTTON_WIDTH, BUTTON_HEIGHT, "RETRY...", (0,153,0))
+        draw_button(250, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "connection Lost . . .", (0,0,0))
+        draw_button(300, 250, BUTTON_WIDTH, BUTTON_HEIGHT, "RETRY", (0,153,0))
         draw_button(300, 350, BUTTON_WIDTH, BUTTON_HEIGHT, "CLOSE", (204, 0, 0))
 
         for event in pygame.event.get():
@@ -456,7 +456,7 @@ def waiting_connection():
 
     while not config.running1:
         screen.fill((0, 0, 0))
-        draw_button(300, 250, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Waiting for opponent...", (0,153,0))
+        draw_button(230, 250, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Waiting for opponent . . .", (0,0,0))
         draw_button(300, 350, BUTTON_WIDTH, BUTTON_HEIGHT, "CLOSE", (204, 0, 0))
 
         if config.replay_op == True and config.replay_self == True:
@@ -502,10 +502,10 @@ def win():
         screen.fill((0, 0, 0))
 
         if config.first_player_win == True:
-            draw_button(300, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Player1 Win!!", (0,153,0))
+            draw_button(230, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Player1  Won ! ! !", (0,0,0))
 
         if config.second_player_win == True:
-            draw_button(300, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Player2 Win!!", (0,153,0))
+            draw_button(230, 150, BUTTON_WIDTH+150, BUTTON_HEIGHT, "Player2  Won ! ! !", (0,0,0))
 
         draw_button(300, 250, BUTTON_WIDTH, BUTTON_HEIGHT, "REPLAY", (0,153,0))
         draw_button(300, 350, BUTTON_WIDTH, BUTTON_HEIGHT, "CLOSE", (204, 0, 0))
@@ -585,7 +585,12 @@ def play_ground():
         # Inside the game loop, update and draw the bullets
         time1 = start_time
         time2 = time.time()
-
+        if config.p_server == True:
+            draw_button(330, 0, BUTTON_WIDTH-30, BUTTON_HEIGHT-30, "player1", (0, 0, 0))
+        
+        if config.p_client == True:
+            draw_button(330, 0, BUTTON_WIDTH-30, BUTTON_HEIGHT-30, "player2", (0, 0, 0))        
+        
         if time2-time1 > .3:
             bullet = Bullet(first_player.rect.right, first_player.rect.centery)
             first_bullet_group.add(bullet) 
@@ -667,7 +672,9 @@ def play_ground():
         pygame.display.flip()
 
         # Ensure program maintains a rate of 30 frames per second
-        clock.tick(250) 
+        # clock.tick(250) 
+        # clock.tick(5000) 
+        clock.tick(150)
 
     screen.fill((0, 0, 0)) 
 
