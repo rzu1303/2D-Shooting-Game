@@ -52,6 +52,21 @@ This is a 2D shooting game built using Python and Pygame. It's designed for two 
 
 5. Make sure to configure the `config.py` file according to your preferences.
 
+## Technologies Used
+
+1. Python: Programming language used for the game logic.
+  
+2. Pygame: Python library used for developing the game interface and handling graphics.
+
+3. Socket Programming: Used for implementing multiplayer functionality, enabling communication between clients and server.
+
+4. Threading: Utilized to manage concurrent execution of game logic and network operations.
+
+5. Queue: Used for handling input and data exchange between threads.
+
+6. pygame.locals: Provides constants and utilities for handling keyboard inputs and events.
+
+
 ## Video Demo
 
 Watch the gameplay in action on [YouTube](https://www.youtube.com/watch?v=Gq0HsdapQws).
